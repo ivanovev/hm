@@ -37,7 +37,7 @@ def SSPBM_cmd(port='COM2', byte2='08', byte3='AA', byte4='AA', byte5='AA', byte6
     #print('q: ', ' '.join(['%.2X' % i for i in q]))
     out = query_serial(port, 9600, 8, 'N', 1, q, read=True, readlen=8)
     if len(out) == 8:
-        #print('out: ', ' '.join(['%.2X' % i for i in q]))
+        #print('out: ', ' '.join(['%.2X' % i for i in out]))
         return ' '.join(['%.2X' % out[i] for i in range(2, 7)])
     else:
         print(out, len(out), type(out))

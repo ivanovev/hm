@@ -44,7 +44,7 @@ def get_baudrate_valid(baud):
     return int(baud) in [1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600]
 
 def get_query_string(port, cmd):
-    a = cache.find(port, 'addr')
+    a = ANASAT_addr(port)
     param = cmd.split()[0]
     if not a or param in ['R', 'CONNECT', 'DISCONNECT']:
         a = '0000'
@@ -72,7 +72,7 @@ def strip_data(out, cmd):
             ret += out[i]
     return ret
 
-def ANASAT_cmd(port='ttyUSB0', cmd='INFO', *args):
+def ANASAT_cmd(port='COM1', cmd='INFO', *args):
     """
     Функция для доступа к параметрам приёмопередатчика ANASAT
     @param port - для windows: COM1, COM2..., для *nix: ttyS*, ttyUSB*...
@@ -83,7 +83,7 @@ def ANASAT_cmd(port='ttyUSB0', cmd='INFO', *args):
     cmd = cmd.strip()
     cc = cmd.split()
     param = cc[0]
-    a = cache.find(port, 'addr')
+    a = ANASAT_addr(port)
     if not a and param not in ['R', 'BAUDRATE', 'CONNECT', 'DISCONNECT']:
         a = ANASAT_find(port)
         if not a:
@@ -91,14 +91,14 @@ def ANASAT_cmd(port='ttyUSB0', cmd='INFO', *args):
     bps = ANASAT_bps(port)
     read = param not in ['BAUDRATE', 'CONNECT', 'DISCONNECT']
     q = get_query_string(port, cmd)
-    out = query_serial(port, bps, 8, 'N', 1, q, '\3', True)
+    out = query_serial(port, bps, 8, 'N', 1, q, '\x03', True)
     #print('q:', q, 'cmd:', cmd, 'param:', param, 'bps:', bps, 'read:', read, 'len(out)', len(out), 'out:', out)
     if not out: return ''
     if param in ['TX', 'TXR', 'TXREQ', 'TXREQUEST', 'TXCHAN', 'RXCHAN', 'TXGAIN', 'RXGAIN', 'TXFREQ', 'RXFREQ'] and len(cc) > 1:
         return cc[1]
     return strip_data(out, cmd)
 
-def ANASAT_BAUDRATE(port='ttyUSB0', bps='9600'):
+def ANASAT_BAUDRATE(port='COM1', bps='9600'):
     '''
     Установить скорость которая будет использоваться для работы с приёмопередатчиком
     @n команда BAUDRATE в последовательный порт ПОСЫЛАЕТСЯ
@@ -111,14 +111,14 @@ def ANASAT_BAUDRATE(port='ttyUSB0', bps='9600'):
     ANASAT_cmd(port, 'BAUDRATE %s' % bps)
     return ANASAT_bps(port, bps)
 
-def ANASAT_ADC_VREF(port='ttyUSB0'):
+def ANASAT_ADC_VREF(port='COM1'):
     '''
     То же самое что и ANASAT.cmd(port, 'ADC_VREF')
     @return ADC_VREF
     '''
     return cache.get(lambda: ANASAT_cmd(port, 'ADC_VREF'), port, 'ADC_VREF')
 
-def ANASAT_ACT(port='ttyUSB0', param='TEMP'):
+def ANASAT_ACT(port='COM1', param='TEMP'):
     '''
     Получить offset и gain для параметра param
     @param param - monitor_point из списка:
@@ -136,7 +136,16 @@ def ANASAT_ACT(port='ttyUSB0', param='TEMP'):
         return ''
     return '%s %s' % (aa[2*p], aa[2*p+1])
 
-def ANASAT_ADC(port='ttyUSB0', param='TEMP'):
+def ANASAT_OFFSET_TABLE(port='COM1'):
+    a = ANASAT_addr(port)
+    offset_table = cache.get(lambda: ANASAT_cmd(port, 'OFFSET_TABLE'), port, 'OFFSET_TABLE')
+    if not offset_table and a != '0000':
+        a = ANASAT_addr(port, '0000')
+        offset_table = cache.get(lambda: ANASAT_cmd(port, 'OFFSET_TABLE'), port, 'OFFSET_TABLE')
+        ANASAT_addr(port, a)
+    return offset_table
+
+def ANASAT_ADC(port='COM1', param='TEMP'):
     '''
     Получить пересчитанное значение АЦП
     @ для получения непересчинанного значения можно использовать ANASAT.cmd(port, 'ADC %param%')
@@ -144,7 +153,7 @@ def ANASAT_ADC(port='ttyUSB0', param='TEMP'):
     @n TEMP, TXOUT, RXOUT, P12V, PA3, PA4, PA5, PA6, N5V, OSLPLL, TXPLL, RXPLL, LNBV, TXIN, TXOPLL, P5V, PA1, PA2
     @return значение %param%
     '''
-    adc = cache.get(lambda: ANASAT_cmd(port, 'ADC'), port, 'ADC', duration=3)
+    adc = cache.get(lambda: ANASAT_cmd(port, 'ADC'), port, 'ADC', duration=10)
     if not adc:
         return
     p = table_act[param]
@@ -153,14 +162,15 @@ def ANASAT_ADC(port='ttyUSB0', param='TEMP'):
         return ''
     adc = aa[p]
     if param in ['RXOUT', 'TXIN', 'TXOUT']:
-        p = cache.get(lambda: ANASAT_cmd(port, 'P'), port, 'P', duration=3)
+        p = cache.get(lambda: ANASAT_cmd(port, 'P'), port, 'P', duration=10)
         if not p:
             return ''
         tp = table_p[param]
         sp = p[tp:tp+2]
         ip = int(sp, 16)
         if ip >= 128: ip = ip - 256
-        offset_table = cache.get(lambda: ANASAT_cmd(port, 'OFFSET_TABLE'), port, 'OFFSET_TABLE', duration=3)
+        #offset_table = cache.get(lambda: ANASAT_cmd(port, 'OFFSET_TABLE'), port, 'OFFSET_TABLE')#, duration=10)
+        offset_table = ANASAT_OFFSET_TABLE(port)
         if not offset_table:
             return ''
         ot = offset_table.split()
@@ -187,19 +197,20 @@ def ANASAT_ADC(port='ttyUSB0', param='TEMP'):
         ret = ret.rstrip('.')
         return ret
 
-def ANASAT_ALARM(port='ttyUSB0'):
+def ANASAT_ALARM(port='COM1'):
     '''
     То же самое что и ANASAT.cmd(port, 'ALARM')
     @return ALARM
     '''
     return ANASAT_cmd(port, 'ALARM')
 
-def ANASAT_find(port='ttyUSB0'):
+def ANASAT_find(port='COM1'):
     """
     Получить адрес приёмопередатчика ANASAT (ODU Packet Address)
     @param port - для windows: COM1, COM2..., для *nix: ttyS*, ttyUSB*...
     @return - адрес (например 01FF)
     """
+    print('ANASAT_find')
     ANASAT_addr(port, addr='0000')
     ANASAT_bps(port, '9600')
     r = ANASAT_cmd(port, 'DISCONNECT; R 0 1')
@@ -217,7 +228,7 @@ def ANASAT_find(port='ttyUSB0'):
         ANASAT_BAUDRATE(port, '9600')
     return a
 
-def ANASAT_addr(port='ttyUSB0', addr=''):
+def ANASAT_addr(port='COM1', addr=''):
     '''
     Получить или задать адрес устройства, подключенного к порту %port%
     @return addr
@@ -227,7 +238,7 @@ def ANASAT_addr(port='ttyUSB0', addr=''):
         return a if a else ''
     return cache.get(lambda: addr, port, 'addr', forceupd=True)
 
-def ANASAT_bps(port='ttyUSB0', bps=''):
+def ANASAT_bps(port='COM1', bps=''):
     '''
     Установить скорость которая будет использоваться для работы с приёмопередатчиком
     @n команда BAUDRATE в последовательный порт НЕ ПОСЫЛАЕТСЯ

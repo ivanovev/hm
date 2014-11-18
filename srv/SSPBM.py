@@ -5,7 +5,7 @@ import pdb
 
 cache = CachedDict()
 
-def SSPBM_addr(port='ttyr0', addr=''):
+def SSPBM_addr(port='COM3', addr=''):
     '''
     Получить или задать адрес устройства, подключенного к порту %port%
     @return addr
@@ -15,7 +15,7 @@ def SSPBM_addr(port='ttyr0', addr=''):
         return a if a else '1'
     return cache.get(lambda: addr, port, 'addr', forceupd=True)
 
-def SSPBM_cmd(port='COM2', byte2='08', byte3='AA', byte4='AA', byte5='AA', byte6='AA'):
+def SSPBM_cmd(port='COM3', byte2='08', byte3='AA', byte4='AA', byte5='AA', byte6='AA'):
     """
     Функция для доступа к параметрам передатчика SSPBM-KS10-DSE
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
@@ -43,7 +43,7 @@ def SSPBM_cmd(port='COM2', byte2='08', byte3='AA', byte4='AA', byte5='AA', byte6
         print(out, len(out), type(out))
     return ''
 
-def SSPBM_sn(port='COM2'):
+def SSPBM_sn(port='COM3'):
     """
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
     @return серийный номер
@@ -67,14 +67,14 @@ def cmd_b2_b3(port, b2, b3='AA'):
         return '%.1f' % (f/10)
     return ''
 
-def SSPBM_temp(port='COM2'):
+def SSPBM_temp(port='COM3'):
     """
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
     @return температура
     """
     return cmd_b2_b3(port, '12')
 
-def SSPBM_pwr(port='COM2'):
+def SSPBM_pwr(port='COM3'):
     """
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
     @return power level
@@ -91,7 +91,7 @@ def cmd_gain_atten(port, b3, v=''):
     else:
         return cmd_b2_b3(port, '0A', b3)
 
-def SSPBM_gain(port='COM2', gain=''):
+def SSPBM_gain(port='COM3', gain=''):
     """
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
     @param gain - SSPBM gain
@@ -108,21 +108,21 @@ def cmd_gain_atten_range(port, b3):
     fmax = 256.*int(cc[3], 16) + int(cc[4], 16)
     return '%.1f-%.1f' % (fmin/10, fmax/10)
 
-def SSPBM_atten_range(port='COM2'):
+def SSPBM_atten_range(port='COM3'):
     """
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
     @return atten range
     """
     return cmd_gain_atten_range(port, '55')
 
-def SSPBM_gain_range(port='COM2'):
+def SSPBM_gain_range(port='COM3'):
     """
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
     @return gain range
     """
     return cmd_gain_atten_range(port, '5A')
 
-def SSPBM_atten(port='COM2', atten=''):
+def SSPBM_atten(port='COM3', atten=''):
     """
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
     @param atten - SSPBM atten
@@ -130,7 +130,7 @@ def SSPBM_atten(port='COM2', atten=''):
     """
     return cmd_gain_atten(port, '55', atten)
 
-def SSPBM_tx(port='COM2', tx=''):
+def SSPBM_tx(port='COM3', tx=''):
     """
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
     @param tx - SSPBM tx
@@ -148,7 +148,7 @@ def SSPBM_tx(port='COM2', tx=''):
             return '%d' % (int(c01.split()[3], 16) & 1)
     return ''
 
-def SSPBM_alarm(port='COM2'):
+def SSPBM_alarm(port='COM3'):
     """
     @param port - для windows: COM1, COM2..., для *nix: ttyr*...
     @return sum alarm
@@ -156,5 +156,17 @@ def SSPBM_alarm(port='COM2'):
     c01 = SSPBM_cmd(port, byte2='01')
     if c01:
         return '1' if (int(c01.split()[3], 16) & 2) else '0'
+    return ''
+
+def SSPBM_csr5(port='COM3'):
+    """
+    Получить 5-й байт команды 0x05 (CONDITION STATUS RESPONSE)
+    @param port - для windows: COM1, COM2..., для *nix: ttyr*...
+    @return XX
+    """
+    csr = SSPBM_cmd(port, byte2='05')
+    cc = csr.split()
+    if len(cc) == 5:
+        return cc[3]
     return ''
 

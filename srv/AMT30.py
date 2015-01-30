@@ -378,10 +378,16 @@ def AMT30_devinfo(port, addr=''):
             d1 = d.split()
             alias = d1[-1]
             if 'Modulator' in d1:
-                ret.append(alias)
-            if 'Demodulator' in d1:
+                None
+            elif 'Demodulator' in d1:
                 if alias == 'R':
                     alias = 'R1'
-                ret.append(alias)
+            else:
+                continue
+            t = AMT30_RS232(port, addr, '%s card' % alias)
+            t = t.lower()
+            if t.find('turbo') >= 0:
+                alias += 't'
+            ret.append(alias)
         return ' '.join(ret)
 

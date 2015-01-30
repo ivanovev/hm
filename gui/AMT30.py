@@ -45,30 +45,32 @@ def desmode_fmt_cb(val, read=True, coef=1000):
 def get_ctrl(dev):
     if 'devdata' not in dev:
         return
-    if dev['devdata'] == 'mod':
+    if dev['devdata'].find('mod') == 0:
         ctrl_mod = Data(io_cb=cmd_io_cb, send=True)
         ctrl_mod.add_page('Modulator')
-        ctrl_mod.add('CODE', label='FEC codec', wdgt='radio', value=OD([('Turbo','turbo'),('Viterbi','viterbi')]), send=False)
-        ctrl_mod.add('MOD', label='TX output', wdgt='radio', value=['Enable', 'Disable'])
-        ctrl_mod.add('MT', label='Modulation', wdgt='radio', value=['BPSK', 'QPSK', '8PSK', '16QAM'])
-        ctrl_mod.add('RATE', label='Encoder', wdgt='radio', value=['1/2', '3/4', 'C3/4', '7/8', '19/20'])
-        ctrl_mod.add('DATA', label='Data rate, kbps', wdgt='spin', value=Data.spn(9.6, 10000, .1), fmt_cb=data_fmt_cb)
-        ctrl_demod.add('CARRIER', label='Modulator Frequency, MHz', wdgt='spin', value=Data.spn(52, 176, .001), fmt_cb=lambda val, read=True: data_fmt_cb(val, read, coef=1000000))
-        ctrl_mod.add('SCRAM', label='Scrabler', wdgt='radio', value=['Enable', 'Disable'])
+        if dev['devdata'][-1] == 't':
+            ctrl_mod.add('CODE',label='FEC codec',wdgt='radio',value=['Turbo','Viterbi'])
+        ctrl_mod.add('MOD',label='TX output',wdgt='radio',value=['Enable','Disable'])
+        ctrl_mod.add('MT',label='Modulation',wdgt='radio',value=['BPSK','QPSK','8PSK','16QAM'])
+        ctrl_mod.add('RATE',label='Encoder',wdgt='radio',value=['1/2','3/4','C3/4','7/8','19/20'])
+        ctrl_mod.add('DATA',label='Data rate,kbps',wdgt='spin',value=Data.spn(9.6,10000,.1),fmt_cb=data_fmt_cb)
+        ctrl_mod.add('CARRIER',label='Modulator Frequency,MHz',wdgt='spin',value=Data.spn(52,176,.001),fmt_cb=lambda val,read=True: data_fmt_cb(val,read,coef=1000000))
+        ctrl_mod.add('SCRAM',label='Scrabler',wdgt='radio',value=['Enable','Disable'])
         return ctrl_mod
-    if dev['devdata'] == 'demod':
+    if dev['devdata'].find('demod') == 0:
         ctrl_demod = Data(io_cb=cmd_io_cb, send=True)
         ctrl_demod.add_page('Demodulator')
-        ctrl_demod.add('CODE', label='FEC codec', wdgt='radio', value=OD([('Turbo','turbo'),('Viterbi','viterbi')]), send=False)
-        ctrl_demod.add('ACQ', label='Acquisition', wdgt='radio', value=['FFT', 'SWEEP', 'FFT-SWEEP'])
-        ctrl_demod.add('MT', label='Demodulation', wdgt='radio', value=['BPSK', 'QPSK', '8PSK', '16QAM'])
-        ctrl_demod.add('RATE', label='Encoder', wdgt='radio', value=['1/2', '3/4', 'C3/4', '7/8', '19/20'])
-        ctrl_demod.add('DATA', label='Data rate, kbps', wdgt='spin', value=Data.spn(9.6, 10000, .1), fmt_cb=data_fmt_cb)
-        ctrl_demod.add('CARRIER', label='Modulator Frequency, MHz', wdgt='spin', value=Data.spn(52, 176, .001), fmt_cb=lambda val, read=True: data_fmt_cb(val, read, coef=1000000))
-        ctrl_demod.add('SWEEP', label='Sweep width, khz', wdgt='spin', value=Data.spn(1, 512, .001), fmt_cb=data_fmt_cb)
-        ctrl_demod.add('DESC', label='Descrabler', wdgt='radio', value=['Enable', 'Disable'])
-        ctrl_demod.add('DIFF', label='Differential decoder', wdgt='radio', value=['Enable', 'Disable'])
-        ctrl_demod.add('DESMODE', label='Descrambler mode', wdgt='radio', value=['IESS', 'CCITT'], fmt_cb=desmode_fmt_cb)
+        if dev['devdata'][-1] == 't':
+            ctrl_demod.add('CODE',label='FEC codec',wdgt='radio',value=['Turbo','Viterbi'])
+        ctrl_demod.add('ACQ',label='Acquisition',wdgt='radio',value=['FFT','SWEEP','FFT-SWEEP'])
+        ctrl_demod.add('MT',label='Demodulation',wdgt='radio',value=['BPSK','QPSK','8PSK','16QAM'])
+        ctrl_demod.add('RATE',label='Encoder',wdgt='radio',value=['1/2','3/4','C3/4','7/8','19/20'])
+        ctrl_demod.add('DATA',label='Data rate,kbps',wdgt='spin',value=Data.spn(9.6,10000,.1),fmt_cb=data_fmt_cb)
+        ctrl_demod.add('CARRIER',label='Modulator Frequency,MHz',wdgt='spin',value=Data.spn(52,176,.001),fmt_cb=lambda val,read=True: data_fmt_cb(val,read,coef=1000000))
+        ctrl_demod.add('SWEEP',label='Sweep width,khz',wdgt='spin',value=Data.spn(1,512,.001),fmt_cb=data_fmt_cb)
+        ctrl_demod.add('DESC',label='Descrabler',wdgt='radio',value=['Enable','Disable'])
+        ctrl_demod.add('DIFF',label='Differential decoder',wdgt='radio',value=['Enable','Disable'])
+        ctrl_demod.add('DESMODE',label='Descrambler mode',wdgt='radio',value=['IESS','CCITT'],fmt_cb=desmode_fmt_cb)
         return ctrl_demod
 
 def get_devinfo(dev):
@@ -95,11 +97,13 @@ def get_menu(dev):
             dev1[c_addr] = '%s/0' % (dev[c_addr] if c_addr in dev else '')
             dev1['devdata'] = 'mod'
         elif d[0] == 'R':
-            dev1[c_name] = '%s.%s%s' % (dev[c_name], 'Demodulator', d[1:])
-            dev1[c_addr] = '%s/%s' % (dev[c_addr] if c_addr in dev else '', d[1:])
+            dev1[c_name] = '%s.%s%s' % (dev[c_name], 'Demodulator', d[1])
+            dev1[c_addr] = '%s/%s' % (dev[c_addr] if c_addr in dev else '', d[1])
             dev1['devdata'] = 'demod'
         else:
             continue
+        if d[-1] == 't':
+            dev1['devdata'] += '_t'
         devices.append(dev1)
     cbs = OD([('Control',control_cb), ('Monitor',monitor_cb)])
     menus = OD()
@@ -124,7 +128,7 @@ def ebno_ber_fmt_cb(val, read=True):
 def get_mntr(dev):
     if 'devdata' not in dev:
         return
-    if dev['devdata'] == 'mod':
+    if dev['devdata'].find('mod') == 0:
         mntr_mod = Data(io_cb=cmd_io_cb, send=True)
         mntr_mod.add_page('Modulator')
         '''
@@ -134,7 +138,7 @@ def get_mntr(dev):
         mod_mntr_pages.append(dict([('cmds',mod_mntr), ('update', True)]))
         '''
         return mntr_mod
-    elif dev['devdata'] == 'demod':
+    elif dev['devdata'].find('demod') == 0:
         mntr_demod = Data(io_cb=cmd_io_cb, send=True)
         mntr_demod.add_page('demod0')
         mntr_demod.add('CD', wdgt='alarm', msg='Carrier detect', fmt_cb=cd_fmt_cb, trace_cb=alarm_trace_cb)

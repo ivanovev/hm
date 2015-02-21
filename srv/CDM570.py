@@ -15,19 +15,18 @@ def CDM570_cmd(port, addr='0', param='EID', val=''):
         q = '<%s/%s=%s\r' % (addr, param, val)
     else:
         q = '<%s/%s?\r' % (addr, param)
-    out = query_serial(port, 9600, 8, 'N', 1, q, '\n', True)
+    endstr = '\n'
+    if param.upper() == 'FRW':
+        endstr = ''
+    out = query_serial(port, 9600, 8, 'N', 1, q, endstr, True)
     #print(out)
     if not out:
         return
     if val:
         return val
-    oo = out.split('/')
-    if len(oo) != 2:
-        return
-    out = oo[1]
-    out = out.replace(param, '')
-    out = out.replace('\n', '')
-    out = out.replace('\r', '')
-    out = out.replace('=', '')
+    i = out.find('=')
+    if i > 0:
+        out = out[i+1:]
+    out = out.strip()
     return out
 

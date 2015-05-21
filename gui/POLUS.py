@@ -79,7 +79,7 @@ def alarm_fmt_cb(val, read, bit):
         return '%d' % ((v >> bit) & 1)
 
 def get_mntr(self):
-    data = Data('Monitor')
+    data = Data(name='Monitor')
     data.add('az', label='Azimuth', wdgt='entry', state='readonly', send=True, cmd_cb=polus_cmd_cb)
     data.add('el', label='Elevation', wdgt='entry', state='readonly', send=True, cmd_cb=polus_cmd_cb)
     def add_alarm(k, bit, msg, cmd_cb=None):
@@ -129,7 +129,7 @@ def stop_cb(ctrl):
 
 def get_ctrl(dev):
     ctrl_buttons = OD([('Read', read_cb), ('Write', write_cb), ('Stop', stop_cb)])
-    ctrl = Data('Setup', buttons=ctrl_buttons)
+    ctrl = Data(name='Setup', buttons=ctrl_buttons)
     ctrl.add('limaz', label='Azimuth max.', wdgt='spin', value=Data.spn(0, 16383), send=True, fmt_cb=lambda val, read: ae0_fmt_cb(val, read, e=0), cmd_cb=polus_cmd_cb)
     ctrl.add('limaz2', label='Azimuth min.', wdgt='spin', value=Data.spn(0, 16383), fmt_cb=lambda val, read: ae0_fmt_cb(val, read, e=1))
     ctrl.add('limel', label='Elevation max.', wdgt='spin', value=Data.spn(0, 16383), send=True, fmt_cb=lambda val, read: ae0_fmt_cb(val, read, e=2), cmd_cb=polus_cmd_cb)

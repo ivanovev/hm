@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=starthm
+GenericName=Monitoring & Control program
+Exec=/usr/bin/starthm
+Terminal=true
+Categories=Utility;

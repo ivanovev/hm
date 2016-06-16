@@ -1,9 +1,7 @@
 
 from collections import OrderedDict as OD
-from util.mainwnd import control_cb, monitor_cb
-from util.data import Data
 from util.columns import *
-from util.callbacks import dev_serial_io_cb, cmd_serial_io_cb, alarm_trace_cb
+from util import Data, control_cb, monitor_cb, dev_serial_io_cb, cmd_serial_io_cb, alarm_trace_cb
 
 def columns():
     return get_columns([c_serial])

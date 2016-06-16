@@ -3,12 +3,7 @@ from collections import OrderedDict as OD
 from copy import deepcopy
 from . import CDM570
 from util.columns import *
-from util.server import proxy
-from util.cache import CachedDict
-from util.data import Data
-from util.mainwnd import control_cb, monitor_cb
-from util.callbacks import dev_io_cb, alarm_trace_cb
-import pdb
+from util import Data, CachedDict, proxy, control_cb, monitor_cb, dev_io_cb, alarm_trace_cb
 
 cache = CachedDict()
 

@@ -1,6 +1,6 @@
 
-from util.serial import query_serial
 from datetime import datetime
+from util.serial import query_serial
 
 def SL2048_cmd(port='ttyUSB0', addr='', param='TCARRIER', val=None):
     """

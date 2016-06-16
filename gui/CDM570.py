@@ -1,9 +1,7 @@
 
 from collections import OrderedDict as OD
-from util.mainwnd import control_cb, monitor_cb
-from util.data import Data, find_key
-from util.callbacks import alarm_trace_cb
 from util.columns import *
+from util import Data, find_key, control_cb, monitor_cb, alarm_trace_cb
 
 def cmd_io_cb(dev, cmd, val=None):
     return 'CDM570.cmd %s %s %s' % (dev[c_serial], dev[c_addr], cmd)

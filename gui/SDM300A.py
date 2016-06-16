@@ -1,9 +1,6 @@
 
 from collections import OrderedDict as OD
-from util.mainwnd import control_cb, monitor_cb
-from util.data import Data
-from util.callbacks import cmd_serial_io_cb, alarm_trace_cb
-import copy
+from util import Data, control_cb, monitor_cb, cmd_serial_io_cb, alarm_trace_cb
 
 def mf_fmt_cb(val, read=True):
     if read:

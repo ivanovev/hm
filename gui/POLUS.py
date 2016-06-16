@@ -2,10 +2,8 @@
 from collections import OrderedDict as OD
 from tkinter import Tk, Toplevel, BOTH, N, E, W
 from tkinter.ttk import Frame, Button
-from util.monitor import Monitor
 from util.columns import *
-from util.callbacks import alarm_trace_cb
-from util import Data, process_cb, control_cb
+from util import Data, Monitor, process_cb, control_cb, alarm_trace_cb
 
 class MoveAntenna(Monitor):
     def __init__(self, dev):

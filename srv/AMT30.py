@@ -1,6 +1,5 @@
 
 from util.serial import query_serial
-import pdb
 
 registers_intf = {
     'STRVER'    :   '\x00',

@@ -1,8 +1,7 @@
 
 from collections import OrderedDict as OD
 from copy import deepcopy
-from util.data import Data
-from util.mainwnd import monitor_cb
+from util import Data, monitor_cb
 
 def flt_fmt_cb(val, read=True, fltn=0):
     return '1'

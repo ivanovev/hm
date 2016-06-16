@@ -1,2 +1,2 @@
 
-from hm.gui.SDM300A import *
+from .SDM300A import *

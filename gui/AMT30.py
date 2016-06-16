@@ -1,10 +1,8 @@
 
 from collections import OrderedDict as OD
 from copy import deepcopy
-from util import Data, alarm_trace_cb
-from util.mainwnd import control_cb, monitor_cb
 from util.columns import *
-from util.cache import CachedDict
+from util import Data, CachedDict, alarm_trace_cb, control_cb, monitor_cb
 
 def cmd_io_cb(dev, cmd):
     cc = cmd.split()

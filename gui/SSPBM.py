@@ -1,7 +1,7 @@
 
 from collections import OrderedDict as OD
-from util import Data, control_cb, monitor_cb, dev_serial_io_cb, alarm_trace_cb
 from util.columns import *
+from util import Data, control_cb, monitor_cb, dev_serial_io_cb, alarm_trace_cb
 
 def get_mntr(dev):
     mntr=Data(io_cb=dev_serial_io_cb)

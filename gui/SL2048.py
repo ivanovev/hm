@@ -1,8 +1,7 @@
 
 from collections import OrderedDict as OD
 from copy import deepcopy
-from util.mainwnd import monitor_cb
-from util.data import Data
+from util import Data, monitor_cb
 
 hm_SL2048_io_cb = lambda d,c: 'SL2048.cmd %s %s %s' % (d['serial'], d['addr'], c)
 

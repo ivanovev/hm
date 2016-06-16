@@ -1,7 +1,6 @@
 
+from util import CachedDict
 from util.serial import query_serial
-from util.cache import CachedDict
-import pdb
 
 cache = CachedDict()
 
